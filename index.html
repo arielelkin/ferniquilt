@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aperiodic Tiler — Cut & Project</title>
+
+  <!-- TailwindCSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- numeric.js (linear algebra) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"
+  integrity="sha512-BK/c8SKG4PMGMg8wo/56FdGMkgQFJgFl8rnVdF1wqIZW73Vw6M/Tde9GmwibV8MoBSBJcwurXGg6B9yvd/Fvcw=="
+  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800">
+  <header class="w-full border-b border-slate-200 bg-white">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <h1 class="text-xl sm:text-2xl font-semibold tracking-tight">Aperiodic Tiler — Cut &amp; Project</h1>
+      <a href="https://numericjs.com/" target="_blank" class="text-sm text-slate-500 hover:text-slate-800">numeric.js</a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Input Panel -->
+    <section class="lg:col-span-4">
+      <div class="rounded-2xl shadow-sm bg-white border border-slate-200 p-4 sm:p-6 space-y-4">
+        <h2 class="text-lg font-semibold">Parameters</h2>
+
+        <!-- d slider -->
+        <div class="space-y-1">
+          <label for="dDim" class="block text-sm font-medium text-slate-700">d (dimension of slope)</label>
+          <div class="flex items-center gap-3">
+            <input id="dDim" type="range" min="1" max="3" value="2" class="w-full accent-indigo-600" />
+            <span id="dLabel" class="w-10 text-right text-sm tabular-nums">2</span>
+          </div>
+          <p class="text-xs text-slate-500">Visualization currently supports <b>d = 2</b>. Other values will show a helpful message.</p>
+        </div>
+
+        <!-- n slider -->
+        <div class="space-y-1">
+          <label for="nCols" class="block text-sm font-medium text-slate-700">n (number of vectors)</label>
+          <div class="flex items-center gap-3">
+            <input id="nCols" type="range" min="3" max="12" value="5" class="w-full accent-indigo-600" />
+            <span id="nLabel" class="w-10 text-right text-sm tabular-nums">5</span>
+          </div>
+          <p class="text-xs text-slate-500">For d=2, defaults to n-th roots of unity.</p>
+        </div>
+
+        <!-- k slider -->
+        <div class="space-y-1">
+          <label for="kBound" class="block text-sm font-medium text-slate-700">k (grid bound)</label>
+          <div class="flex items-center gap-3">
+            <input id="kBound" type="range" min="2" max="20" value="10" class="w-full accent-indigo-600" />
+            <span id="kLabel" class="w-10 text-right text-sm tabular-nums">10</span>
+          </div>
+          <p class="text-xs text-slate-500">Search over indices −k…k per dimension. Larger values increase compute time.</p>
+        </div>
+
+        <!-- Shift mode -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="seedShift" class="block text-sm font-medium text-slate-700">Shift vector S</label>
+            <select id="seedShift" class="mt-1 w-full rounded-lg border border-slate-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="random">Random</option>
+              <option value="zero">Zero</option>
+            </select>
+            <p class="text-xs text-slate-500">Size n.</p>
+          </div>
+          <div class="flex items-end">
+            <button id="btnGenerate" class="btn-primary inline-flex items-center gap-2 w-full justify-center">
+              Generate Tiling
+            </button>
+          </div>
+        </div>
+
+        <div class="text-sm text-slate-500">
+          <span id="status">Ready.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visualization Panel -->
+    <section class="lg:col-span-8">
+      <div class="rounded-2xl shadow-sm bg-white border border-slate-200 p-3 sm:p-4 lg:p-6 h-[70vh] flex flex-col">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-semibold">Visualization</h2>
+          <div class="text-xs text-slate-500" id="metaInfo"></div>
+        </div>
+        <div id="viz" class="viz flex-1 overflow-auto bg-slate-50 border border-slate-100 rounded-xl"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="max-w-7xl mx-auto px-4 pb-8 text-xs text-slate-500">
+    <p>
+      Uses Gram–Schmidt on the slope rows, dual multigrid construction, and an orthonormal projection to 2D.
+    </p>
+  </footer>
+
+  <script src="./tiler.js"></script>
+</body>
+</html>
