@@ -1,4 +1,4 @@
-/* Aperiodic Tiler — Cut & Project (slider UI)
+/* Aperiodic Tiler — Cut & Project (with Thomas’s fixes)
  * numeric.js required (loaded in index.html)
  * All logic is client-side.
  */
@@ -8,11 +8,6 @@ function dot(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] * b
 function sub(a, b) { return a.map((v, i) => v - b[i]); }
 function scale(a, s) { return a.map(v => v * s); }
 function norm(a) { return Math.sqrt(dot(a, a)); }
-function eye(n) {
-  const I = Array.from({ length: n }, () => Array(n).fill(0));
-  for (let i = 0; i < n; i++) I[i][i] = 1;
-  return I;
-}
 function inv(M) { return numeric.inv(M); }
 function mulMV(M, v) { return numeric.dot(M, v); }
 
@@ -171,16 +166,30 @@ function draw_tiling(T, A, container) {
   container.innerHTML = svg;
 }
 
-// ---------- Slope generation ----------
+// ---------- Slope & Shift generation (Thomas’s rules) ----------
+
+// For odd n: use n-th roots (angles 2πk/n).
+// For even n: use 2n-th roots and take the first n (angles 2πk/(2n), k=0..n-1).
 function generateSlopeE(n, d) {
+  const m = (n % 2 === 0) ? 2 * n : n;  // modulus for roots
   const rows = Array.from({ length: d }, () => Array(n).fill(0));
   for (let k = 0; k < n; k++) {
-    const th = (2 * Math.PI * k) / n;
+    const th = (2 * Math.PI * k) / m;
     if (d >= 1) rows[0][k] = Math.cos(th);
     if (d >= 2) rows[1][k] = Math.sin(th);
-    if (d >= 3) rows[2][k] = Math.cos(2 * th);
+    if (d >= 3) rows[2][k] = Math.cos(2 * th); // simple extra harmonic
   }
   return rows;
+}
+
+// Shift: never 0. Symmetric shift is 1/n (odd) or 1/(2n) (even). Otherwise random.
+function makeShift(n, mode) {
+  if (mode === 'symmetric') {
+    const s = (n % 2 === 1) ? (1 / n) : (1 / (2 * n));
+    return Array(n).fill(s);
+  }
+  // random
+  return Array.from({ length: n }, () => Math.random());
 }
 
 // ---------- Wiring ----------
@@ -213,29 +222,29 @@ function generate() {
 
     if (n < d) throw new Error('Require n ≥ d.');
     if (d !== 2) {
-      els.viz().innerHTML = `<div class="hint">This demo currently visualizes only <b>d = 2</b>. Set d=2 and click “Generate”.</div>`;
+      els.viz().innerHTML = `<div class="hint">This demo visualizes only <b>d = 2</b>. Set d=2 and click “Generate”.</div>`;
       els.meta().textContent = `d=${d}, n=${n}, k=${k}`;
       setStatus('Ready (set d=2 to visualize).');
       return;
     }
 
-    setStatus('Building slope E…');
-    const E = generateSlopeE(n, d);
+    setStatus('Building slope E (roots rule)…');
+    const E = generateSlopeE(n, d); // d×n, even n uses 2n-th roots
 
     setStatus('Computing multigrid G…');
-    const G = generators_to_grid(E);
+    const G = generators_to_grid(E); // n×d
 
     setStatus('Generating dual tiling…');
-    const S = (shiftMode === 'zero') ? Array(n).fill(0) : null;
+    const S = makeShift(n, shiftMode); // never zero; symmetric or random
     const T = dual(G, S, k);
 
     setStatus('Building projection…');
-    const A = orthogonal_projection(E);
+    const A = orthogonal_projection(E); // 2×n
 
     setStatus('Drawing…');
     draw_tiling(T, A, els.viz());
 
-    els.meta().textContent = `d=2, n=${n}, tiles=${T.length}, k=${k}`;
+    els.meta().textContent = `d=2, n=${n} (${n % 2 === 0 ? '2n-th roots' : 'n-th roots'}), tiles=${T.length}, k=${k}, shift=${shiftMode}`;
     setStatus('Done.');
   } catch (err) {
     console.error(err);
