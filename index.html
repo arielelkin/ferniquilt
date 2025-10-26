@@ -77,6 +77,25 @@
           </div>
         </div>
 
+        <!-- Palette mode -->
+        <div class="grid grid-cols-2 gap-4 items-end">
+          <div>
+            <label for="paletteMode" class="block text-sm font-medium text-slate-700">Palette</label>
+            <select id="paletteMode" class="mt-1 w-full rounded-lg border border-slate-300 p-2">
+              <option value="gradient" selected>Gradient</option>
+              <option value="grayscale">Grayscale</option>
+            </select>
+            <p class="text-xs text-slate-500">Choose color mapping mode.</p>
+          </div>
+
+          <div class="flex items-end gap-2">
+            <label for="colorA" class="text-sm text-slate-700 mr-2">A</label>
+            <input id="colorA" type="color" value="#646464" title="Start color" />
+            <label for="colorB" class="text-sm text-slate-700 ml-4 mr-2">B</label>
+            <input id="colorB" type="color" value="#f0f0f0" title="End color" />
+          </div>
+        </div>
+
         <div class="text-sm text-slate-500">
           <span id="status">Ready.</span>
         </div>

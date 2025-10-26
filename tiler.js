@@ -110,12 +110,32 @@ function orthogonal_projection(E) {
   return gramSchmidtRows(E);
 }
 
-// grayscale color like Sage's couleur(i,j,n)
+// helpers: hex <-> rgb
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+}
+function rgbToHex(r,g,b) {
+  return '#' + [r,g,b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2,'0')).join('');
+}
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+// updated couleur to use UI colors or fallback to previous grayscale
 function couleur(i, j, n) {
+  const mode = els.paletteMode ? els.paletteMode().value : 'gradient';
   const z = (n * i - (i * (i + 1)) / 2 + (j - i) - 1) / (n * (n - 1) / 2);
-  const v = Math.floor(Math.max(0, Math.min(255, Math.floor(z * 156 + 100))));
-  const hex = v.toString(16).padStart(2, '0');
-  return `#${hex}${hex}${hex}`;
+  const t = Math.max(0, Math.min(1, (z * 156 + 100 - 0) / 255)); // normalized 0..1 roughly matching previous
+  if (mode === 'grayscale') {
+    const v = Math.floor(Math.max(0, Math.min(255, Math.floor(z * 156 + 100))));
+    const hex = v.toString(16).padStart(2, '0');
+    return `#${hex}${hex}${hex}`;
+  } else {
+    const a = els.colorA ? els.colorA().value : '#646464';
+    const b = els.colorB ? els.colorB().value : '#f0f0f0';
+    const ra = hexToRgb(a), rb = hexToRgb(b);
+    const rc = [ lerp(ra[0], rb[0], t), lerp(ra[1], rb[1], t), lerp(ra[2], rb[2], t) ];
+    return rgbToHex(rc[0], rc[1], rc[2]);
+  }
 }
 
 // draw_tiling — SVG
@@ -196,6 +216,9 @@ const els = {
   status: () => document.getElementById('status'),
   viz: () => document.getElementById('viz'),
   meta: () => document.getElementById('metaInfo'),
+  paletteMode: () => document.getElementById('paletteMode'),
+  colorA: () => document.getElementById('colorA'),
+  colorB: () => document.getElementById('colorB'),
 };
 
 function setStatus(text) { els.status().textContent = text; }
