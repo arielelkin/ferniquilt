@@ -139,6 +139,8 @@ function couleur(i, j, n) {
 }
 
 // draw_tiling — SVG
+let lastSvg = '';
+
 function draw_tiling(T, A, container) {
   const width = container.clientWidth || 800;
   const height = container.clientHeight || 600;
@@ -188,6 +190,7 @@ function draw_tiling(T, A, container) {
     svg += `<polygon points="${d}" fill="${poly.color}" fill-opacity="0.95" stroke="none"/>`;
   }
   svg += `</svg>`;
+  lastSvg = svg;              // store last SVG
   container.innerHTML = svg;
 }
 
@@ -213,6 +216,7 @@ const els = {
   kLabel: () => document.getElementById('kLabel'),
   seedShift: () => document.getElementById('seedShift'),
   btnGenerate: () => document.getElementById('btnGenerate'),
+  btnExport: () => document.getElementById('btnExport'), // <--- new
   status: () => document.getElementById('status'),
   viz: () => document.getElementById('viz'),
   meta: () => document.getElementById('metaInfo'),
@@ -285,6 +289,23 @@ window.addEventListener('DOMContentLoaded', () => {
     setStatus('Calculating…');
     setTimeout(generate, 20);
   });
+
+  // Export button
+  const onExport = () => {
+    if (!lastSvg) { setStatus('No SVG available. Generate first.'); return; }
+    const blob = new Blob([lastSvg], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'tiling.svg';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    setStatus('SVG downloaded.');
+  };
+  const exportBtn = els.btnExport();
+  if (exportBtn) exportBtn.addEventListener('click', onExport);
 
   // Auto-run once with defaults
   setTimeout(() => els.btnGenerate().click(), 60);
