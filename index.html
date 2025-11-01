@@ -9,10 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- numeric.js (linear algebra) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"
-  integrity="sha512-BK/c8SKG4PMGMg8wo/56FdGMkgQFJgFl8rnVdF1wqIZW73Vw6M/Tde9GmwibV8MoBSBJcwurXGg6B9yvd/Fvcw=="
-  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
 
   <link rel="stylesheet" href="./style.css" />
 </head>
@@ -37,7 +34,7 @@
             <input id="dDim" type="range" min="1" max="3" value="2" class="w-full accent-indigo-600" />
             <span id="dLabel" class="w-10 text-right text-sm tabular-nums">2</span>
           </div>
-          <p class="text-xs text-slate-500">Visualization currently supports <b>d = 2</b>. Other values will show a helpful message.</p>
+          <p class="text-xs text-slate-500">Visualization supports <b>d = 2</b>. Other values show a note.</p>
         </div>
 
         <!-- n slider -->
@@ -47,7 +44,9 @@
             <input id="nCols" type="range" min="3" max="12" value="5" class="w-full accent-indigo-600" />
             <span id="nLabel" class="w-10 text-right text-sm tabular-nums">5</span>
           </div>
-          <p class="text-xs text-slate-500">For d=2, defaults to n-th roots of unity.</p>
+          <p class="text-xs text-slate-500">
+            For odd n, uses n-th roots of unity. For even n, uses <b>2n-th</b> roots to avoid colinear pairs.
+          </p>
         </div>
 
         <!-- k slider -->
@@ -66,9 +65,9 @@
             <label for="seedShift" class="block text-sm font-medium text-slate-700">Shift vector S</label>
             <select id="seedShift" class="mt-1 w-full rounded-lg border border-slate-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option value="random">Random</option>
-              <option value="zero">Zero</option>
+              <option value="symmetric">Symmetric (1/n if odd, 1/(2n) if even)</option>
             </select>
-            <p class="text-xs text-slate-500">Size n.</p>
+            <p class="text-xs text-slate-500">Zero is not offered (it can cause multi-line intersections).</p>
           </div>
           <div class="flex items-end">
             <button id="btnGenerate" class="btn-primary inline-flex items-center gap-2 w-full justify-center">
